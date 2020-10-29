@@ -3,3 +3,5 @@ target/
 \.idea/
 \.vscode/
 *.log
+*.iml
+/dbconnect-sbt/.sbtopts
