@@ -7,9 +7,9 @@ version := "0.1"
 scalaVersion := "2.12.12"
 scalacOptions ++= Seq("-Xmax-classfile-name", "78")
 
+// To use jars from the databricks-connect, comment out if it's not required
 //// default value
 val jarsPathManual = ""
-
 unmanagedBase := {
  import java.nio.file.{Files, Paths}
  import scala.sys.process._
@@ -44,7 +44,7 @@ unmanagedBase := {
  }
 }
 
-// Example how to use OSS Spark dependencies, to use, comment out the 'unmanagedBase' piece
+// Example how to use OSS Spark dependencies, to use, comment out the 'unmanagedBase' piece and uncomment next lines
 // val sparkVersion = "3.0.1"
 // libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion % Provided
 // libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % Provided
