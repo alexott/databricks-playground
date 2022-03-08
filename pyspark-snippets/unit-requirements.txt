@@ -1,0 +1,6 @@
+setuptools
+wheel
+pytest
+pytest-cov
+pytest-spark
+chispa

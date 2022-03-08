@@ -1,0 +1,2 @@
+pyspark==3.2.1
+delta-spark==1.1.0
