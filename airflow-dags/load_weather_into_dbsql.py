@@ -96,7 +96,6 @@ with DAG(
         load_options={"overwrite": True,},
     )
 
-    # this works only on clusters, not on SQL Endpoints
     import_weather_data = DatabricksCopyIntoOperator(
         task_id="import_weather_data",
         expression_list="date::date, * except(date)",
