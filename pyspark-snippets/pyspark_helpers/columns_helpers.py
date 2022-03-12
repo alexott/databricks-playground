@@ -1,30 +1,32 @@
-from typing import List
+from typing import List, Union
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame, Column
 
 
-def columns_except(df: DataFrame, ex: List[str] = None) -> List[Column]:
+def columns_except(df: DataFrame, ex: List[str] = None, as_column: bool = False) -> List[Union[str, Column]]:
     """
     Returns a new list of columns without specified columns
     :param df: dataframe
     :param ex: columns to exclude
-    :return: new dataframe
+    :param as_column: if we should return list of columns instead of list of strings
+    :return: new list of columns
     """
     if ex is None:
         ex = []
 
-    return [F.col(cl) for cl in df.columns if cl not in ex]
+    return [F.col(cl) if as_column else cl
+            for cl in df.columns if cl not in ex]
 
 
-def except_columns(df: DataFrame, ex: List[str] = None) -> DataFrame:
+def dataframe_except_columns(df: DataFrame, ex: List[str] = None) -> DataFrame:
     """
     Creates a new dataframe without specified columns
     :param df: dataframe
     :param ex: columns to exclude
     :return: new dataframe
     """
-    return df.select(*columns_except(df, ex))
+    return df.select(*columns_except(df, ex, as_column=True))
 
 
 def add_missing_columns(df1: DataFrame, df2: DataFrame) -> DataFrame:
