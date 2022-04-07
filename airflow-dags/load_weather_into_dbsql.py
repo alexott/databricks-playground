@@ -71,8 +71,9 @@ with DAG(
         default_args=airflow_default_args,
         catchup=False,
 ) as dag:
-    schema = "date date, condition STRING, humidity double, precipitation double, region STRING, " \
-             "temperature long, wind long, next_days ARRAY<STRUCT<condition: STRING, day: STRING, " \
+    schema = "date date, condition STRING, humidity double, precipitation double, " \
+             "region STRING, temperature long, wind long, " \
+             "next_days ARRAY<STRUCT<condition: STRING, day: STRING, " \
              "max_temp: long, min_temp: long>>"
 
     create_table = DatabricksSqlOperator(
