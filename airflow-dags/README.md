@@ -11,6 +11,8 @@ This directory contains examples of Airflow DAGs that use [apache-airflow-provid
 * `upload_weather_data` - uploads data from local disk to Azure Blob Storage using `LocalFilesystemToWasbOperator`
 * `import_weather_data` - imports uploaded data with `COPY INTO` SQL command executed via `DatabricksCopyIntoOperator`.
 
+![DAG in Ariflow UI](images/load_weather_data_into_dbsql.png)
+
 To make it working in your environment you need to change following constants:
 
 * `WASBS_CONN_ID` - name of a [Azure Blob Storage connection](https://airflow.apache.org/docs/apache-airflow-providers-microsoft-azure/stable/connections/wasb.html).

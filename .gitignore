@@ -8,3 +8,4 @@ target/
 /pyspark-snippets/databricks_pyspark_helpers.egg-info/
 /pyspark-snippets/dist/
 __pycache__/
+.DS_Store
