@@ -22,7 +22,10 @@ def _is_indexable_column(typ) -> bool:
 def reorder_columns(df: DataFrame, first_columns: List[str] = None,
                     partition_columns: List[str] = None):
     """Reorders columns of the dataframe to make them indexable for Delta Data Skipping. Besides the
-    columns specified by `first_columns` parameter, all time & numeric columns are moved forward
+    columns specified by ``first_columns`` parameter, all time & numeric columns are moved forward.
+    On Databricks, it also sets the ``spark.databricks.delta.properties.defaults.dataSkippingNumIndexedCols``
+    configuration, so when you're writing data first time, it will set ``delta.dataSkippingNumIndexedCols``
+    property on the table.  For OSS, this property needs to be set explicitly.
 
     :param df: dataframe to process
     :param first_columns: list of additional columns that needs to be moved first
