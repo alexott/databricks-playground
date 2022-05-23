@@ -21,7 +21,7 @@ class SimbaJDBCAadTokenAdal {
         String tenantId = "";
         String clientId = "";
         String clientSecret = "";
-        String jdbcString = "jdbc:spark://<host>:443/default;transportMode=http;ssl=1;httpPath=<http_path>;AuthMech=11;Auth_Flow=0;Auth_AccessToken=";
+        String jdbcString = "jdbc:databricks://<host>:443/default;transportMode=http;ssl=1;httpPath=<http_path>;AuthMech=11;Auth_Flow=0;Auth_AccessToken=";
 
         //
         String authority = "https://login.microsoftonline.com/" + tenantId;
