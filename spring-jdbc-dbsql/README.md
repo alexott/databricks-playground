@@ -2,18 +2,6 @@
 
 This directory contains the example of querying data via Databricks SQL Endpoint or Databricks Cluster using JDBC protocol.  Authentication to Databricks is performed using Databricks personal access token. 
 
-## Installation of dependencies
-
-**These steps are required because Simba JDBC driver for Databricks isn't published to the Maven Central!**
-
-* Obtain archive with Simba JDBC driver for Databricks as described in [documentation](https://docs.databricks.com/integrations/bi/jdbc-odbc-bi.html#jdbc-driver).
-* Unpack archive and change into directory containing `SparkJDBC42.jar`
-* Install `SparkJDBC42.jar` into local Maven directory with following command (I'm using version 2.6.22, so adjust version number in command line and in the `pom.xml` if you use different version):
-
-```sh
-mvn install:install-file -Dfile=SparkJDBC42.jar -DgroupId=com.simba \
-  -DartifactId=spark-jdbc -Dversion=2.6.22 -Dpackaging=jar
-```
 
 ## Adjusting parameters
 

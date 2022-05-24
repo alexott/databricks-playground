@@ -15,7 +15,7 @@ public class SimpleQuery {
         String token = "";
         String query = "select * from default.table";
 
-        String jdbcUrl = "jdbc:spark://" + host + ":443/default;transportMode=http;ssl=1;httpPath=" +
+        String jdbcUrl = "jdbc:databricks://" + host + ":443/default;transportMode=http;ssl=1;httpPath=" +
                 httpPath + ";AuthMech=3;UID=token;PWD=" + token;
 
         // define data source

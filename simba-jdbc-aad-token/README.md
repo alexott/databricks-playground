@@ -5,9 +5,6 @@ This directory contains the example of querying data via Databricks SQL Endpoint
 * `SimbaJDBCAadTokenMsal` - uses [Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-overview) - it's a recommended way of generating AAD tokens. 
 * `SimbaJDBCAadTokenAdal` - uses old [Microsoft Azure Active Directory Authentication Library (ADAL)](https://github.com/AzureAD/azure-activedirectory-library-for-java) that isn't recommended to use.  Source code is just kept for reference.
 
-
-## Installation of dependencies
-
 ## Adjusting parameters
 
 You need to update source code and adjust following parameters:
