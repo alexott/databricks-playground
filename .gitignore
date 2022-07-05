@@ -9,3 +9,4 @@ target/
 /pyspark-snippets/dist/
 __pycache__/
 .DS_Store
+/kafka-aad-auth/dependency-reduced-pom.xml
