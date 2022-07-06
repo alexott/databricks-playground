@@ -9,11 +9,12 @@ import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class for generation of AAD tokens based on the Service Principal Client ID & Secret
+ */
 public class ServicePrincipalCredentialsAuth extends ServicePrincipalAuthBase {
     private String clientId;
     private String clientSecret;
-
-    // private static final Logger logger = LoggerFactory.getLogger(ServicePrincipalCredentialsAuth.class);
 
     private static final String AAD_CLIENT_ID_KEY = "aad_client_id";
     private static final String AAD_CLIENT_SECRET_KEY = "aad_client_secret";

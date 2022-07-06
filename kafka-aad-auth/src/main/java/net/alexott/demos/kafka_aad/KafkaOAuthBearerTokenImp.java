@@ -8,12 +8,12 @@ import java.util.Set;
 
 import org.apache.kafka.common.security.oauthbearer.OAuthBearerToken;
 
-public class OAuthBearerTokenImp implements OAuthBearerToken
+public class KafkaOAuthBearerTokenImp implements OAuthBearerToken
 {
     String token;
     long lifetimeMs;
 
-    public OAuthBearerTokenImp(final String token, Date expiresOn) {
+    public KafkaOAuthBearerTokenImp(final String token, Date expiresOn) {
         this.token = token;
         this.lifetimeMs = expiresOn.getTime();
     }

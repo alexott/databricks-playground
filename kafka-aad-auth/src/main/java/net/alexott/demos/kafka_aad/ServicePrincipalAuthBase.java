@@ -36,14 +36,14 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
      * Creates an instance of the client that will be used to obtain AAD tokens
      *
      * @return client that will be used to obtain AAD tokens
-     * @throws MalformedURLException
+     * @throws MalformedURLException when authEndpoint URL is malformed
      */
     abstract ConfidentialClientApplication getClient() throws MalformedURLException;
 
     /**
      * Extracts common configuration properties, such as, AAD Tenant ID
      *
-     * @param configs Kafka configuraiton parameters
+     * @param configs Kafka configuration parameters
      */
     protected void configureCommon(Map<String, ?> configs) {
         this.msalParameters = getMsalParameters(configs);
@@ -58,23 +58,15 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
         authEndpoint += tenantId;
     }
 
+    /**
+     * Creates an instance of the parameters for MSAL. Currently only consists of the scope
+     *
+     * @param configs Kafka configs map
+     * @return MSAL properties
+     */
     static ClientCredentialParameters getMsalParameters(Map<String, ?> configs) {
-//        for (Map.Entry<String, ?> entry: configs.entrySet()) {
-//            logger.info("Config: key='{}', value='{}'", entry.getKey(), entry.getValue());
-//        }
-//        for (AppConfigurationEntry entry: jaasConfigEntries) {
-//            logger.info("JAAS: loginModule='{}', control flag='{}'",
-//                    entry.getLoginModuleName(), entry.getControlFlag());
-//            Map<String, ?> map = entry.getOptions();
-//            String mapAsString = map.keySet().stream()
-//                    .map(key -> key + "=" + map.get(key))
-//                    .collect(Collectors.joining(", ", "{", "}"));
-//            logger.info("JAAS options: {}", mapAsString);
-//        }
-
-
         String bootstrapServer = configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG).toString();
-        bootstrapServer = bootstrapServer.substring(1, bootstrapServer.length()-2);
+        bootstrapServer = bootstrapServer.substring(1, bootstrapServer.length() - 2);
         bootstrapServer = bootstrapServer.substring(0, bootstrapServer.indexOf(':'));
         try {
             URL url = new URL("https", bootstrapServer, "/.default");
@@ -94,10 +86,22 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
         for (Callback callback : callbacks) {
             if (callback instanceof OAuthBearerTokenCallback) {
                 try {
-                    OAuthBearerToken token = getToken();
+                    if (this.msalClient == null) {
+                        synchronized (this) {
+                            if (this.msalClient == null) {
+                                this.msalClient = getClient();
+                                if (this.msalClient == null) {
+                                    throw new IOException("Can't create MSAL client");
+                                }
+                            }
+                        }
+                    }
+                    IAuthenticationResult authResult = this.msalClient.acquireToken(this.msalParameters).get();
+                    // logger.debug("Token acquired: {}", authResult.accessToken());
+                    OAuthBearerToken token = new KafkaOAuthBearerTokenImp(authResult.accessToken(), authResult.expiresOnDate());
                     OAuthBearerTokenCallback oauthCallback = (OAuthBearerTokenCallback) callback;
                     oauthCallback.token(token);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
             } else {
@@ -105,22 +109,4 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
             }
         }
     }
-
-    OAuthBearerToken getToken()
-        throws MalformedURLException, InterruptedException, ExecutionException, TimeoutException {
-        if (this.msalClient == null) {
-            synchronized (this) {
-                if (this.msalClient == null) {
-                    this.msalClient = getClient();
-                }
-            }
-        }
-
-        IAuthenticationResult authResult = this.msalClient.acquireToken(this.msalParameters).get();
-        // logger.debug("Token acquired: {}", authResult.accessToken());
-
-        return new OAuthBearerTokenImp(authResult.accessToken(), authResult.expiresOnDate());
-    }
-
-
 }
