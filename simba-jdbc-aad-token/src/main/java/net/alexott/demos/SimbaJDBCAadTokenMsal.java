@@ -35,7 +35,7 @@ class SimbaJDBCAadTokenMsal {
         ClientCredentialParameters authParameters = ClientCredentialParameters.builder(databricksScope).build();
         IAuthenticationResult authResult = app.acquireToken(authParameters).join();
 
-        String JDBC_DRIVER = "com.simba.spark.jdbc.Driver";
+        String JDBC_DRIVER = "com.databricks.client.jdbc.Driver";
         String DB_URL = jdbcString + authResult.accessToken();
 
         Class.forName(JDBC_DRIVER);

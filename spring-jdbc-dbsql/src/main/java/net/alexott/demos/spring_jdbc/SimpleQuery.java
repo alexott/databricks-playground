@@ -2,7 +2,7 @@ package net.alexott.demos.spring_jdbc;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import com.simba.spark.jdbc.Driver;
+import com.databricks.client.jdbc.Driver;
 
 import java.util.List;
 import java.util.Map;

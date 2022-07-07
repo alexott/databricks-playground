@@ -34,7 +34,7 @@ class SimbaJDBCAadTokenAdal {
         Future<AuthenticationResult> future = context.acquireToken("2ff814a6-3304-4ab8-85cb-cd0e6f879c1d", credential, null);
         AuthenticationResult result = future.get();
 
-        String JDBC_DRIVER = "com.simba.spark.jdbc.Driver";
+        String JDBC_DRIVER = "com.databricks.client.jdbc.Driver";
         String DB_URL = jdbcString + result.getAccessToken();
 
         Class.forName(JDBC_DRIVER);
