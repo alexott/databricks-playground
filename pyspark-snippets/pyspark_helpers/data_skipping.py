@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pyspark.sql.types as T
 from pyspark.sql import DataFrame, SparkSession
@@ -19,8 +19,8 @@ def _is_indexable_column(typ) -> bool:
     )
 
 
-def reorder_columns(df: DataFrame, first_columns: List[str] = None,
-                    partition_columns: List[str] = None):
+def reorder_columns(df: DataFrame, first_columns: Optional[List[str]] = None,
+                    partition_columns: Optional[List[str]] = None):
     """Reorders columns of the dataframe to make them indexable for Delta Data Skipping. Besides the
     columns specified by ``first_columns`` parameter, all time & numeric columns are moved forward.
     On Databricks, it also sets the ``spark.databricks.delta.properties.defaults.dataSkippingNumIndexedCols``

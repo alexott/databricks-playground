@@ -1,6 +1,4 @@
-
-
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from delta.tables import DeltaTable
 from pyspark.sql import DataFrame, SparkSession
@@ -11,8 +9,8 @@ def merge_into_or_create(
         primary_key_columns: List[str],
         path: str = "",
         table_name: str = "",
-        partitionby: List[str] = None,
-        opts: Dict[str, Any] = None,
+        partitionby: Optional[List[str]] = None,
+        opts: Optional[Dict[str, Any]] = None,
 ):
     """Performs merging of data into given Delta table, inserting the new data & updating existing data.
     Creates a new table if it doesn't exist

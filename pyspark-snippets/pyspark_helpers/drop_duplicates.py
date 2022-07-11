@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from delta.tables import DeltaTable
 from pyspark.sql import DataFrame, SparkSession
@@ -9,8 +9,9 @@ def drop_duplicates_with_merge(
         primary_key_columns: List[str],
         path: str = "",
         table_name: str = "",
-        partitionby: List[str] = None,
-        opts: Dict[str, Any] = None,
+        partitionby: Optional[List[str]] = None,
+        opts: Optional[Dict[str, Any]] = None,
+        additional_merge_cond: Optional[str] = None,
 ):
     """Performs removal of duplicates using the Delta MERGE operation.  If table doesn't exist,
     it's created by writing the dataframe into a specified location.  This function is primarily
@@ -22,6 +23,8 @@ def drop_duplicates_with_merge(
     :param table_name: optional name of the table (required if path isn't specified)
     :param partitionby: optional list of columns to partition by
     :param opts: optional dictionary with options for creation of Delta table
+    :param additional_merge_cond: additional merge condition appended to the generated condition
+        using ``AND``. The destination columns are prefixed as ``dest`` & new data as ``update``.
     :return: nothing
     """
     # print(f"Performing merge for {path=} or {table_name=}")
@@ -41,11 +44,13 @@ def drop_duplicates_with_merge(
                 tbl = DeltaTable.forName(spark, table_name)
             else:
                 tbl = DeltaTable.forPath(spark, path)
-            dname = "dests"
-            uname = "updates"
+            dname = "dest"
+            uname = "update"
             merge_cond = " and ".join(
                 [f"{dname}.{col} <=> {uname}.{col}" for col in primary_key_columns]
             )
+            if additional_merge_cond:
+                merge_cond = merge_cond + " AND " + additional_merge_cond
             tbl.alias(dname).merge(
                 df.alias(uname), merge_cond
             ).whenNotMatchedInsertAll().execute()
@@ -67,8 +72,8 @@ def drop_duplicates_with_merge(
 def drop_duplicates_builtin(
         df: DataFrame,
         primary_key_columns: List[str],
-        watermark_column: str = None,
-        watermark_time: str = None,
+        watermark_column: Optional[str] = None,
+        watermark_time: Optional[str] = None,
 ):
     """Performs deletion of duplicates on the given dataframe using the `.dropDuplicates` function.
     :param df: dataframe to process

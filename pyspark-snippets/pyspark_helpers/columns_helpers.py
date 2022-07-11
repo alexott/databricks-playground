@@ -1,10 +1,10 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame, Column
 
 
-def columns_except(df: DataFrame, ex: List[str] = None, as_column: bool = False) -> List[Union[str, Column]]:
+def columns_except(df: DataFrame, ex: Optional[List[str]] = None, as_column: bool = False) -> List[Union[str, Column]]:
     """
     Returns a new list of columns without specified columns
     :param df: dataframe
@@ -19,7 +19,7 @@ def columns_except(df: DataFrame, ex: List[str] = None, as_column: bool = False)
             for cl in df.columns if cl not in ex]
 
 
-def dataframe_except_columns(df: DataFrame, ex: List[str] = None) -> DataFrame:
+def dataframe_except_columns(df: DataFrame, ex: Optional[List[str]] = None) -> DataFrame:
     """
     Creates a new dataframe without specified columns
     :param df: dataframe
