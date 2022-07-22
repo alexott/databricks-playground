@@ -27,10 +27,12 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
     protected volatile ConfidentialClientApplication msalClient;
     protected ClientCredentialParameters msalParameters;
     protected String authEndpoint;
+    protected String clientId;
 
     private static final String AAD_TENANT_ID_KEY = "aad_tenant_id";
     private static final String AAD_AUTHORITY_ENDPOINT_KEY = "aad_authority_endpoint";
-    private static final Logger logger = LoggerFactory.getLogger(ServicePrincipalCredentialsAuth.class);
+    private static final String AAD_CLIENT_ID_KEY = "aad_client_id";
+    private static final Logger logger = LoggerFactory.getLogger(ServicePrincipalAuthBase.class);
 
     /**
      * Creates an instance of the client that will be used to obtain AAD tokens
@@ -49,6 +51,7 @@ abstract public class ServicePrincipalAuthBase implements AuthenticateCallbackHa
         this.msalParameters = getMsalParameters(configs);
 
         String tenantId = configs.get(AAD_TENANT_ID_KEY).toString();
+        clientId = configs.get(AAD_CLIENT_ID_KEY).toString();
         Object ob = configs.get(AAD_AUTHORITY_ENDPOINT_KEY);
         if (ob == null) {
             authEndpoint = "https://login.microsoftonline.com/";

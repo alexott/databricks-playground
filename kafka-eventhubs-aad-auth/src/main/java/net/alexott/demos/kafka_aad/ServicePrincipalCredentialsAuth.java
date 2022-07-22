@@ -13,17 +13,14 @@ import java.util.Map;
  * Class for generation of AAD tokens based on the Service Principal Client ID & Secret
  */
 public class ServicePrincipalCredentialsAuth extends ServicePrincipalAuthBase {
-    private String clientId;
     private String clientSecret;
 
-    private static final String AAD_CLIENT_ID_KEY = "aad_client_id";
     private static final String AAD_CLIENT_SECRET_KEY = "aad_client_secret";
 
     @Override
     public void configure(Map<String, ?> configs, String mechanism,
                           List<AppConfigurationEntry> jaasConfigEntries) {
         configureCommon(configs);
-        clientId = configs.get(AAD_CLIENT_ID_KEY).toString();
         clientSecret = configs.get(AAD_CLIENT_SECRET_KEY).toString();
     }
 

@@ -10,3 +10,4 @@ target/
 __pycache__/
 .DS_Store
 /kafka-aad-auth/dependency-reduced-pom.xml
+dependency-reduced-pom.xml
