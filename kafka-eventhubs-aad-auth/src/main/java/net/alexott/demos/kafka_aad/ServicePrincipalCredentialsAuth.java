@@ -18,8 +18,7 @@ public class ServicePrincipalCredentialsAuth extends ServicePrincipalAuthBase {
     private static final String AAD_CLIENT_SECRET_KEY = "aad_client_secret";
 
     @Override
-    public void configure(Map<String, ?> configs, String mechanism,
-                          List<AppConfigurationEntry> jaasConfigEntries) {
+    public void configure(Map<String, ?> configs, String mechanism, List<AppConfigurationEntry> jaasConfigEntries) {
         configureCommon(configs);
         clientSecret = configs.get(AAD_CLIENT_SECRET_KEY).toString();
     }

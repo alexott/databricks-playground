@@ -19,7 +19,7 @@ and then use it to build package using Maven:
 mvn clean package -P profile-name
 ```
 
-that will generate a jar file with name `kafka-eventhubs-aad-auth-<version>-<dbr_version>.jar` in the `target` directory. Add this library to a Databricks cluster or Databricks job.  Please note that for 7.3 & 9.1 versions you will need to add `com.microsoft.azure:msal4j:1.10.1` library to a cluster/job, as it isn't shipped together with these Databricks runtimes.  If you use this library to access via EventHubs protocol, you need to add corresponding library using following coordinates: `com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22`.
+that will generate a jar file with name `kafka-eventhubs-aad-auth-<version>-<dbr_version>.jar` in the `target` directory. Add this library to a Databricks cluster or Databricks job.  You also need to add `com.microsoft.azure:msal4j:1.10.1` library to a cluster/job, as it isn't shipped together with Databricks runtimes.  If you use this library to access via EventHubs protocol, you need to add corresponding library using following coordinates: `com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22`.
 
 # Configure Service Principal
 
@@ -120,10 +120,8 @@ callback_class_name = "net.alexott.demos.eventhubs_aad.ServicePrincipalCredentia
 # Instead of `servicebus.windows.net` there could be regional endpoints
 ehs_endpoint = f"sb://{ehs_ns_name}.servicebus.windows.net"
 
-# Generate EventHubs connection string.
-myURI = sc._jvm.java.net.URI(ehs_endpoint)
-connectionString = sc._jvm.org.apache.spark.eventhubs.ConnectionStringBuilder() \
-  .setEndpoint(myURI).setEventHubName(topic).build()
+# EventHubs connection string.
+connectionString = f"Endpoint=sb://{ehs_ns_name}.servicebus.windows.net;EntityPath={topic}"
 
 # Parameters that will be passed to the callback function
 params = {
