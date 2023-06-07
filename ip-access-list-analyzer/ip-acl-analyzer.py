@@ -2,6 +2,7 @@ import argparse
 from typing import List
 import copy
 import itertools
+import json
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.settings import IpAccessListInfo, ListType
@@ -9,7 +10,29 @@ from databricks.sdk.service.settings import IpAccessListInfo, ListType
 import ipaddress
 
 
-def process_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
+def check_for_subnet_inclusion(ip_addresses: List[str], oip: str, cond: bool, to_remove: List[str]):
+    if oip.find("/") == -1:
+        return
+
+    oip_net = ipaddress.ip_network(oip)
+    for ip in ip_addresses:
+        if ip == oip:
+            continue
+        if ip.find("/") == -1:
+            if ipaddress.ip_address(ip) in oip_net and cond:
+                print(f"{ip} is part of {oip}, removing...")
+                to_remove.append(ip)
+        elif oip_net.supernet_of(ipaddress.ip_network(ip)) and cond:
+            print(f"{ip} is subnet of {oip}, removing...")
+            to_remove.append(ip)
+
+
+def analyze_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
+    """Analyze and modify the IP Access Lits if problems are found
+
+    :param orig: source list of IP Access List structures
+    :return: new, potentially modified list of IP Access List structures
+    """
     lsts = copy.deepcopy(orig)
 
     all_ips = list(itertools.chain(*[l.ip_addresses for l in lsts]))
@@ -42,19 +65,9 @@ def process_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
 
             # finding subranges
             for oip in l2.ip_addresses:
-                if oip.find("/") == -1:
-                    continue
                 try:
-                    oip_net = ipaddress.ip_network(oip)
-                    for ip in ip_addresses:
-                        if ip.find("/") == -1:
-                            if ipaddress.ip_address(ip) in oip_net and l2.list_type == l.list_type:
-                                print(f"{ip} is part of {oip} in '{l2.label}', removing...")
-                                to_remove.append(ip)
-                        else:
-                            if oip_net.supernet_of(ipaddress.ip_network(ip)) and l2.list_type == l.list_type:
-                                print(f"{ip} is subnet of {oip} in '{l2.label}', removing...")
-                                to_remove.append(ip)
+                    check_for_subnet_inclusion(ip_addresses, oip,
+                                               l2.list_type == l.list_type, to_remove)
                 except ValueError as ex:
                     print(f"\tWarn: Incorrect IP Address or Network: '{ex}'")
 
@@ -71,7 +84,12 @@ def process_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
             except ValueError as ex:
                 print(f"\tWarn: Incorrect IP Address or Network: '{ip}': {ex}")
 
-            # TODO: find subranges, in the list as well...
+        # find subranges, in the current list as well...
+        for oip in ip_addresses:
+            try:
+                check_for_subnet_inclusion(ip_addresses, oip, True, to_remove)
+            except ValueError as ex:
+                print(f"\tWarn: Incorrect IP Address or Network: '{ex}'")
 
         if len(to_remove) > 0:
             print(f"\tRemoving from {l.label}: {to_remove}")
@@ -87,6 +105,15 @@ def process_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
 
 def apply_modifications(w: WorkspaceClient, make_changes: bool, orig: List[IpAccessListInfo],
                         new: List[IpAccessListInfo]):
+    """Apply modifications to the specific IP Access Lists if there are changes
+    in a specific IP Access List.  Delete a list if it's empty
+
+    :param w: WorkspaceClient
+    :param make_changes: if we should apply changes to workspace
+    :param orig: original list of IP Access Lists
+    :param new: potentially modified list of IP Access Lists
+    :return:
+    """
     ol = dict([(l.list_id, l) for l in orig])
     for l in new:
         if len(l.ip_addresses) == 0:
@@ -110,6 +137,8 @@ def main():
     parser = argparse.ArgumentParser(description='Analyze and fix Databricks IP Access Lists')
     parser.add_argument('--apply', help="Do analysis and apply changes",
                         action='store_true', default=False)
+    parser.add_argument('--json-file', nargs=1,
+                        help="Load IP Access Lists from a JSON file that is output of lists API")
     args = parser.parse_args()
     # print(args)
     if args.apply:
@@ -120,8 +149,16 @@ def main():
     w = WorkspaceClient()
     print(f"Processing IP Access Lists for host {w.config.host}")
 
-    ipls = list(w.ip_access_lists.list())
-    new_ipls = process_lists(ipls)
+    if args.json_file:
+        print(f"Going to load IP Access Lists from JSON file: {args.json_file[0]}")
+        with open(args.json_file[0]) as f:
+            d = json.load(f)
+            ipls = [IpAccessListInfo.from_dict(l) for l in d['ip_access_lists']]
+    else:
+        print("Getting IP Access Lists from workspace")
+        ipls = list(w.ip_access_lists.list())
+
+    new_ipls = analyze_lists(ipls)
 
     apply_modifications(w, args.apply, ipls, new_ipls)
 
