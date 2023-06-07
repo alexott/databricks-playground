@@ -14,16 +14,16 @@ def check_for_subnet_inclusion(ip_addresses: List[str], oip: str, cond: bool, to
     if oip.find("/") == -1:
         return
 
-    oip_net = ipaddress.ip_network(oip)
+    oip_net = ipaddress.ip_network(oip, False)
     for ip in ip_addresses:
         if ip == oip:
             continue
         if ip.find("/") == -1:
             if ipaddress.ip_address(ip) in oip_net and cond:
-                print(f"{ip} is part of {oip}, removing...")
+                print(f"\t{ip} is part of {oip}, removing...")
                 to_remove.append(ip)
-        elif oip_net.supernet_of(ipaddress.ip_network(ip)) and cond:
-            print(f"{ip} is subnet of {oip}, removing...")
+        elif oip_net.supernet_of(ipaddress.ip_network(ip, False)) and cond:
+            print(f"\t{ip} is subnet of {oip}, removing...")
             to_remove.append(ip)
 
 
@@ -42,7 +42,10 @@ def analyze_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
 
     for i in range(len(lsts)):
         l = lsts[i]
-        print(f"Processing list: {l.label} ({l.list_id})")
+        if not l.enabled:
+            print(f"Skipping not enabled list {l.label} ({l.list_id})")
+            continue
+        print(f"Processing list '{l.label}' ({l.list_id})")
         to_remove = []
         ip_addresses = l.ip_addresses
         # find duplicates inside the list
@@ -54,13 +57,14 @@ def analyze_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
 
         # find duplicates & overlaps with other lists
         for l2 in lsts:
-            if l2.list_id == l.list_id:
+            # skip current list or if another list isn't enabled
+            if l2.list_id == l.list_id or not l2.enabled:
                 continue
             dups = set(ip_addresses).intersection(l2.ip_addresses)
             if len(dups) > 0:
                 print(f"\tFound intersection with list {l2.label}")
                 if l2.list_type == ListType.BLOCK or (l.list_type == ListType.ALLOW):
-                    print("Modifying current list...")
+                    print("\tModifying current list...")
                     to_remove.extend(dups)
 
             # finding subranges
@@ -77,7 +81,7 @@ def analyze_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
                 if ip.find("/") == -1:
                     ip_addr = ipaddress.ip_address(ip)
                 else:
-                    ip_addr = ipaddress.ip_network(ip)
+                    ip_addr = ipaddress.ip_network(ip, False)
                 if ip_addr.is_loopback or ip_addr.is_private:
                     print(f"\tWe can ignore {ip} because it's local or private...")
                     to_remove.append(ip)
@@ -92,7 +96,7 @@ def analyze_lists(orig: List[IpAccessListInfo]) -> List[IpAccessListInfo]:
                 print(f"\tWarn: Incorrect IP Address or Network: '{ex}'")
 
         if len(to_remove) > 0:
-            print(f"\tRemoving from {l.label}: {to_remove}")
+            print(f"\tRemoving from {l.label}: {list(set(to_remove))}")
             for ip in set(to_remove):
                 ip_addresses.remove(ip)
 
@@ -118,17 +122,17 @@ def apply_modifications(w: WorkspaceClient, make_changes: bool, orig: List[IpAcc
     for l in new:
         if len(l.ip_addresses) == 0:
             print(f"Going to remove list '{l.label}' ({l.list_id}) as it's empty")
-            if make_changes:
+            if w and make_changes:
                 w.ip_access_lists.delete(l.list_id)
             continue
         old = ol[l.list_id]
-        if len(l.ip_addresses) == len(old.ip_addresses):
-            print(f"List '{l.label}' ({l.list_id}) isn't modified")
+        if len(l.ip_addresses) == len(old.ip_addresses) or not l.enabled:
+            print(f"List '{l.label}' ({l.list_id}) isn't modified or not enabled")
         else:
             print(f"Going to modify list '{l.label}' ({l.list_id})")
             print(f"\tfrom: {old}")
             print(f"\tto  : {l}")
-            if make_changes:
+            if w and make_changes:
                 w.ip_access_lists.update(label=l.label, list_id=l.list_id, list_type=l.list_type,
                                          enabled=l.enabled, ip_addresses=l.ip_addresses)
 
@@ -146,8 +150,7 @@ def main():
     else:
         print("Performing only analysis...")
 
-    w = WorkspaceClient()
-    print(f"Processing IP Access Lists for host {w.config.host}")
+    w = None
 
     if args.json_file:
         print(f"Going to load IP Access Lists from JSON file: {args.json_file[0]}")
@@ -156,6 +159,8 @@ def main():
             ipls = [IpAccessListInfo.from_dict(l) for l in d['ip_access_lists']]
     else:
         print("Getting IP Access Lists from workspace")
+        w = WorkspaceClient()
+        print(f"Processing IP Access Lists for host {w.config.host}")
         ipls = list(w.ip_access_lists.list())
 
     new_ipls = analyze_lists(ipls)
