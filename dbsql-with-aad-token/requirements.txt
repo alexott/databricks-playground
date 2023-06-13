@@ -1,2 +1,2 @@
-azure-identity
+#azure-identity
 databricks-sql-connector
