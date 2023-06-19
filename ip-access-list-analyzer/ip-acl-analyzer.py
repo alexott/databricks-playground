@@ -135,8 +135,9 @@ def apply_modifications(w: WorkspaceClient, make_changes: bool, orig: List[IpAcc
             logging.debug(f"\tfrom: {old}")
             logging.debug(f"\tto  : {l}")
             if w and make_changes:
-                w.ip_access_lists.update(label=l.label, list_id=l.list_id, list_type=l.list_type,
-                                         enabled=l.enabled, ip_addresses=l.ip_addresses)
+                w.ip_access_lists.update(ip_access_list_id=l.list_id,
+                    label=l.label, list_id=l.list_id, list_type=l.list_type,
+                    enabled=l.enabled, ip_addresses=l.ip_addresses)
 
 
 def main():
