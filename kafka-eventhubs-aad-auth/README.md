@@ -6,11 +6,11 @@ This directory contains a library for using Azure Active Directory tokens to con
 
 You need to select profile to build this project:
 
-| Profile name | Supported DBR versions  | Status     |
-|--------------|-------------------------|------------|
-|`dbr-10.4`    | DBR 10.4+, DBR 11.x     | tested     |
-|`dbr-9.1`     | DBR 9.1 LTS             | not tested |
-|`dbr-7.3`     | DBR 7.3 LTS             | not tested |
+| Profile name | Supported DBR versions       | Status     |
+|--------------|------------------------------|------------|
+|`dbr-10.4`    | DBR 10.4, DBR 11.3, DBR 12.2 | tested     |
+|`dbr-9.1`     | DBR 9.1 LTS                  | not tested |
+|`dbr-7.3`     | DBR 7.3 LTS                  | not tested |
 
 
 and then use it to build package using Maven:
