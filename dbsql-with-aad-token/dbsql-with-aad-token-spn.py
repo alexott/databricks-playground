@@ -11,9 +11,9 @@ def get_env_or_raise(name: str) -> str:
 
 # Variables to fill
 # Host name without https://
-host_name="adb-6688808130562317.17.azuredatabricks.net"
+host_name="adb-xxx.17.azuredatabricks.net"
 # Path obtained as per instructions https://docs.databricks.com/dev-tools/python-sql-connector.html#get-started
-http_path="/sql/1.0/warehouses/dca3a0ba199040eb"
+http_path="/sql/1.0/warehouses/xxx"
 # Your query to execute
 query = "select * from samples.nyctaxi.trips limit 5"
 
