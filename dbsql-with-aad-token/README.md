@@ -1,13 +1,15 @@
 # Querying Databricks SQL or cluster using AAD token
 
-This directory contain demonstration of how to authenticate to Databricks using Azure Active Directory token when using [python-sql-connector](https://docs.databricks.com/dev-tools/python-sql-connector.html) library. There are two implementations:
+This directory contain demonstration of how to authenticate to Databricks using Azure Active Directory token when using [python-sql-connector](https://docs.databricks.com/dev-tools/python-sql-connector.html) library. There are three implementations:
 1. `dbsql-with-aad-token-spn.py` using service principal and execute query against Databricks SQL Endpoint or Databricks Cluster.
-2. `dbsql-with-aad-token-user.py`
+2. `dbsql-with-aad-token-user.py` using user AAD interactive authentication.
+2. `dbsql-with-aad-token-mi.py` using Azure Managed Identity associated with VM or AKS cluster.
 
 ## Installation
 
 Install all necessary dependencies:
-* databricks-sql-connector
+
+* `databricks-sql-connector`
 
 by executing:
 
@@ -37,6 +39,11 @@ Authentication parameters of service principal could be set in the code directly
 
 * `ARM_CLIENT_ID` - client ID of application in Azure Active Directory that has user impersonation permission for Azure Databricks
 
+### Set authentication parameters for dbsql-with-aad-token-mi.py
+
+By default, the script will use default managed identity associated with the Azure VM or AKS. If you want to authenticate using a specific user-assigned managed identity, then set following environment variable.
+
+* `ARM_CLIENT_ID` - client ID of user-assigned managed identity associated with VM or AKS.
 
 ## Execute script(s)
 
@@ -50,6 +57,12 @@ or
 
 ```sh
 python dbsql-with-aad-token-user.py
+```
+
+or (only from VM with MI)
+
+```sh
+python dbsql-with-aad-token-mi.py
 ```
 
 and it will print result of query execution.

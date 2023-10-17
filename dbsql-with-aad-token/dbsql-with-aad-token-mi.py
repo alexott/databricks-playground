@@ -3,16 +3,17 @@ from typing import Dict, Optional
 from databricks import sql
 import requests
 import time
+import os
 
 from databricks.sql.auth.authenticators import AuthProvider
 
 # Variables to fill
 # Host name without https://
-host_name = "adb-6688808130562317.17.azuredatabricks.net"
+host_name = "adb-.....17.azuredatabricks.net"
 # Path obtained as per instructions https://docs.databricks.com/dev-tools/python-sql-connector.html#get-started
 http_path = "/sql/1.0/warehouses/951d1b041fc6c792"
 # Your query to execute
-query = "select * from samples.nyctaxi.trips limit 5"
+query = "select 42, current_timestamp(), current_catalog(), current_database(), current_user()"
 
 TOKEN_REFRESH_LEAD_TIME = 120
 DEFAULT_DATABRICKS_SCOPE = "2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
@@ -73,7 +74,8 @@ class AzureMIAuthProvider(AuthProvider):
         return request_headers
 
 
-creds = AzureMIAuthProvider()
+creds = AzureMIAuthProvider(uami_application_id=os.getenv("ARM_CLIENT_ID"),
+                            databricks_resource_id=os.getenv("DATABRICKS_AZURE_RESOURCE_ID"))
 
 with sql.connect(server_hostname=host_name, http_path=http_path,
                  credentials_provider=lambda: creds) as connection:

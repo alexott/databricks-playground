@@ -16,7 +16,7 @@ host_name = "adb-xxxx.17.azuredatabricks.net"
 # Path obtained as per instructions https://docs.databricks.com/dev-tools/python-sql-connector.html#get-started
 http_path = "/sql/1.0/warehouses/xxx"
 # Your query to execute
-query = "select * from samples.nyctaxi.trips limit 5"
+query = "select 42, current_timestamp(), current_catalog(), current_database(), current_user()"
 
 # Explicit initialization of the authenticator
 client_id = get_env_or_raise("ARM_CLIENT_ID")
