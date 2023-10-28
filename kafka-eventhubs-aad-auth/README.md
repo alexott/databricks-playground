@@ -2,7 +2,40 @@
 
 This directory contains a library for using Azure Active Directory tokens to connect to the Azure Event Hubs using the Spark Kafka connector via Kafka protocol or [Spark EventHubs connector](https://github.com/Azure/azure-event-hubs-spark/).
 
-# Build
+## Using Spark Kafka connector on Databricks Runtime version 12.2+ and Delta Live Tables
+
+Since DBR 12.2, the Apache Kafka client that is used by Databricks Runtime is upgraded to versions that are directly supporting OAuth/OIDC flows, so there is no need to build this library - you just need to correctly configure Kafka consumer, like this:
+
+```py
+topic = "<topic>"
+eh_namespace_name = "<eh_namespace_name>"
+eh_server = f"{eh_namespace_name}.servicebus.windows.net"
+
+# Data for service principal are stored in the secret scope
+tenant_id = dbutils.secrets.get("scope", "tenant_id")
+client_id = dbutils.secrets.get("scope", "sp-id")
+client_secret = dbutils.secrets.get("scope", "sp-secret")
+# Generate
+sasl_config = f'kafkashaded.org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="{client_id}" clientSecret="{client_secret}" scope="https://{eh_server}/.default" ssl.protocol="SSL";'
+
+# Create Kafka options dictionary
+callback_class = "kafkashaded.org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler"
+kafka_options = {
+  "kafka.bootstrap.servers": f"{eh_server}:9093",
+  "subscribe": topic,
+  "startingOffsets": "earliest",
+  "kafka.security.protocol": "SASL_SSL",
+  "kafka.sasl.mechanism": "OAUTHBEARER",
+  "kafka.sasl.jaas.config": sasl_config,
+  "kafka.sasl.oauthbearer.token.endpoint.url": f"https://login.microsoft.com/{tenant_id}/oauth2/v2.0/token",
+  "kafka.sasl.login.callback.handler.class": callback_class,
+}
+
+df = spark.readStream.format("kafka").options(**kafka_options).load()
+```
+
+
+## Build the library for DBR runtime versions below 12.2
 
 You need to select profile to build this project:
 
@@ -21,7 +54,7 @@ mvn clean package -P profile-name
 
 that will generate a jar file with name `kafka-eventhubs-aad-auth-<version>-<dbr_version>.jar` in the `target` directory. Add this library to a Databricks cluster or Databricks job.  You also need to add `com.microsoft.azure:msal4j:1.10.1` library to a cluster/job, as it isn't shipped together with Databricks runtimes.  If you use this library to access via EventHubs protocol, you need to add corresponding library using following coordinates: `com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22`.
 
-# Configure Service Principal
+## Configure Service Principal
 
 Right now this library supports following authentication methods:
 
@@ -33,7 +66,7 @@ Service principal should have following permissions on the specific topic:
 * `Azure Event Hubs Data Receiver` - for consuming from Event Hubs
 * `Azure Event Hubs Data Sender` - for writing to Event Hubs
 
-# Use with Spark Kafka connector
+## Use with Spark Kafka connector
 
 All authentication methods should provide following options:
 
@@ -45,7 +78,7 @@ All authentication methods should provide following options:
 * `kafka.sasl.jaas.config` should be set to `kafkashaded.org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;` (trailing `;` is required!)
 
 
-## Authenticating using Service Principal client ID & secret
+### Authenticating using Service Principal client ID & secret
 
 We need to provide following options:
 
@@ -84,7 +117,7 @@ df = (
   )
 ```
 
-# Use with EventHubs
+## Use with EventHubs
 
 All authentication methods should provide following options:
 
@@ -95,7 +128,7 @@ All authentication methods should provide following options:
 * `eventhubs.AadAuthCallbackParams` - is the JSON-encoded dictionary with parameters that will be passed to callback handler's class constructor.
 * `eventhubs.aadAuthCallback` - is the class name of specific implementation
 
-## Authenticating using Service Principal client ID & secret
+### Authenticating using Service Principal client ID & secret
 
 We need to provide additional options:
 
@@ -142,18 +175,18 @@ df = spark.readStream.format("eventhubs").options(**ehConf).load()
 ```
 
 
-# Limitations
+## Limitations
 
 * We currently support only one bootstrap server for Kafka
 
 
-# Troubleshooting
+## Troubleshooting
 
-## TopicAuthorizationException: Not authorized to access topics
+### TopicAuthorizationException: Not authorized to access topics
 
 Check that service principal has correct permission for all Event Hubs topics as described above
 
-## No OAuth Bearer tokens in Subject's private credentials
+### No OAuth Bearer tokens in Subject's private credentials
 
 Usually is caused the incorrect configuration, check Spark logs to see actual exception.
 
@@ -161,7 +194,5 @@ Usually is caused the incorrect configuration, check Spark logs to see actual ex
 ## Project Support
 
 Please note that this project is provided for your exploration only, and are not formally supported by Databricks with Service Level Agreements (SLAs).  They are provided AS-IS and we do not make any guarantees of any kind.  Please do not submit a support ticket relating to any issues arising from the use of this project.
-
-Any issues discovered through the use of this project should be filed as GitHub Issues on the Repo.  They will be reviewed as time permits, but there are no formal SLAs for support.
 
 Any issues discovered through the use of this project should be filed as GitHub Issues on the Repo.  They will be reviewed as time permits, but there are no formal SLAs for support.
