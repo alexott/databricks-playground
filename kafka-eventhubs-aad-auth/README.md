@@ -4,7 +4,7 @@ This directory contains a library for using Azure Active Directory tokens to con
 
 ## Using Spark Kafka connector on Databricks Runtime version 12.2+ and Delta Live Tables
 
-Since DBR 12.2, the Apache Kafka client that is used by Databricks Runtime is upgraded to versions that are directly supporting OAuth/OIDC flows, so there is no need to build this library - you just need to correctly configure Kafka consumer, like this:
+Since DBR 12.2, the Apache Kafka client that is used by Databricks Runtime is upgraded to versions that are directly supporting OAuth/OIDC flows, so there is no need to build this library - you just need to correctly configure Kafka consumer, like this (*please note that it doesn't work yet on Unity Catalog Shared clusters and Unity Catalog Delta Live Tables pipelines*):
 
 ```py
 topic = "<topic>"
@@ -33,7 +33,6 @@ kafka_options = {
 
 df = spark.readStream.format("kafka").options(**kafka_options).load()
 ```
-
 
 ## Build the library for DBR runtime versions below 12.2
 
