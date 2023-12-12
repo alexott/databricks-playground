@@ -1,45 +1,36 @@
 package net.alexott.demos;
 
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-class SimbaJDBCAadTokenAdal {
+class SimbaJDBCAadTokenUser {
 
     public static void main(String[] args) throws Exception {
         // Variables to set
-        String query = "";
-        String tenantId = "";
-        String clientId = "";
-        String clientSecret = "";
-        String jdbcString = "jdbc:databricks://<host>:443/default;transportMode=http;ssl=1;httpPath=<http_path>;AuthMech=11;Auth_Flow=0;Auth_AccessToken=";
+        String query = "select 42, current_timestamp(), current_catalog(), current_database(), current_user()";
+        String host = "adb-.....17.azuredatabricks.net";
+        String httpPath = "/sql/1.0/warehouses/....";
 
-        //
-        String authority = "https://login.microsoftonline.com/" + tenantId;
-        ExecutorService service = Executors.newFixedThreadPool(1);
-
-        AuthenticationContext context = new AuthenticationContext(authority, true, service);
-
-        ClientCredential credential = new ClientCredential(clientId, clientSecret);
-        System.out.println("Going to acquire token");
-        Future<AuthenticationResult> future = context.acquireToken("2ff814a6-3304-4ab8-85cb-cd0e6f879c1d", credential, null);
-        AuthenticationResult result = future.get();
+        boolean enableTokenCache = System.getProperty("enableTokenCache", "false")
+                .equalsIgnoreCase("true");
+        String tokenCachePassPhrase = "1234567";
+        String jdbcString = String.format("jdbc:databricks://%s:443;httpPath=%s;AuthMech=11;Auth_Flow=2",
+                host, httpPath);
+        if (enableTokenCache) {
+            jdbcString = String.format("%s;TokenCachePassPhrase=%s;EnableTokenCache=1",
+                    jdbcString, tokenCachePassPhrase);
+        } else {
+            jdbcString += ";EnableTokenCache=0";
+        }
 
         String JDBC_DRIVER = "com.databricks.client.jdbc.Driver";
-        String DB_URL = jdbcString + result.getAccessToken();
 
         Class.forName(JDBC_DRIVER);
         System.out.println("Getting connection");
-        try (Connection conn = DriverManager.getConnection(DB_URL);
+        try (Connection conn = DriverManager.getConnection(jdbcString);
              Statement stmt = conn.createStatement()) {
             System.out.println("Going to execute query");
             try (ResultSet rs = stmt.executeQuery(query)) {

@@ -1,37 +1,37 @@
 # Querying Databricks via JDBC with AAD token
 
-This directory contains the example of querying data via Databricks SQL Endpoint or Databricks Cluster using JDBC protocol.  Authentication to Databricks is performed using Azure Active Directory tokens issued for Azure Service Principal.  Package contains two similar examples that differ only by which library is used to generate AAD token:
+This directory contains the example of querying data via Databricks SQL Endpoint or Databricks Cluster using JDBC protocol.   Since version 2.6.36 the JDBC driver supports OAuth authentication. Following examples demonstrate that:
 
-* `SimbaJDBCAadTokenMsal` - uses [Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-overview) - it's a recommended way of generating AAD tokens. 
-* `SimbaJDBCAadTokenAdal` - uses old [Microsoft Azure Active Directory Authentication Library (ADAL)](https://github.com/AzureAD/azure-activedirectory-library-for-java) that isn't recommended to use.  Source code is just kept for reference.
+* `SimbaJDBCAadTokenUser` - authentication to Databricks is performed using Azure Active Directory tokens issued for the current user.
+* `SimbaJDBCAadTokenServicePrincipal` - authentication to Databricks is performed using Azure Active Directory tokens issued for Azure Service Principal.
 
 ## Adjusting parameters
+
+Right now many parameters are hard-coded, so you need to change them before running.
+
+### For `SimbaJDBCAadTokenServicePrincipal`
 
 You need to update source code and adjust following parameters:
 
 * `query` - what query should be executed
-* `tenantId` - tenant ID in Azure Active Directory
 * `clientId` - client ID of application in Azure Active Directory
-* `clientSecret` - secret for AAD application (ideally should be take from KeyVault);
-* `jdbcString` - **JDBC string** obtained as per [documentation](https://docs.databricks.com/integrations/bi/jdbc-odbc-bi.html#jdbc-driver), and modified as following - replace `;AuthMech=3;UID=token;PWD=<personal-access-token>` with `;AuthMech=11;Auth_Flow=0;Auth_AccessToken=` (AAD token will be append to it), for example:
+* `clientSecret` - secret for AAD application (ideally should be taken from KeyVault);
+* `host` - the host portion of the Databricks workspace (obtained from SQL Warehouse configuraiton)
+* `httpPath` - the HTTP Path of the SQL Warehouse (obtained from SQL Warehouse configuraiton)
 
-```
-jdbc:databricks://<host>:443/default;transportMode=http;ssl=1;httpPath=<http-path>;AuthMech=3;UID=token;PWD=<personal-access-token>
-```
+### For `SimbaJDBCAadTokenUser`
 
-should become:
-
-```
-jdbc:databricks://<host>:443/default;transportMode=http;ssl=1;httpPath=<http-path>;AuthMech=11;Auth_Flow=0;Auth_AccessToken=
-```
+* `query` - what query should be executed
+* `host` - the host portion of the Databricks workspace (obtained from SQL Warehouse configuraiton)
+* `httpPath` - the HTTP Path of the SQL Warehouse (obtained from SQL Warehouse configuraiton)
 
 ## Build & run
 
 Just execute `mvn package` to build the code, and then you can execute resulting uber jar:
 
 ```sh
-java -cp target/simba-jdbc-aad-token-0.0.1-jar-with-dependencies.jar \
-  net.alexott.demos.SimbaJDBCAadTokenMsal
+java -cp target/simba-jdbc-aad-token-0.0.2-jar-with-dependencies.jar \
+  net.alexott.demos.SimbaJDBCAadTokenServicePrincipal
 ```
 
 Or the code could be executed from an IDE.
