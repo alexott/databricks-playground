@@ -1,4 +1,4 @@
-# Querying Databricks SQL or cluster using AAD token
+# Querying Databricks SQL or cluster via Databricks SQL Python connector using AAD token
 
 This directory contain demonstration of how to authenticate to Databricks using Azure Active Directory token when using [python-sql-connector](https://docs.databricks.com/dev-tools/python-sql-connector.html) library. There are three implementations:
 1. `dbsql-with-aad-token-spn.py` using service principal and execute query against Databricks SQL Endpoint or Databricks Cluster.
