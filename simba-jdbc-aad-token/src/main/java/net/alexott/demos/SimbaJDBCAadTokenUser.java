@@ -13,12 +13,16 @@ class SimbaJDBCAadTokenUser {
         String query = "select 42, current_timestamp(), current_catalog(), current_database(), current_user()";
         String host = "adb-.....17.azuredatabricks.net";
         String httpPath = "/sql/1.0/warehouses/....";
+        String oauthClientId = "";
 
         boolean enableTokenCache = System.getProperty("enableTokenCache", "false")
                 .equalsIgnoreCase("true");
         String tokenCachePassPhrase = "1234567";
         String jdbcString = String.format("jdbc:databricks://%s:443;httpPath=%s;AuthMech=11;Auth_Flow=2",
                 host, httpPath);
+        if (!oauthClientId.isEmpty()) {
+            jdbcString = String.format("%s;OAuth2ClientId=%s", jdbcString, oauthClientId);
+        }
         if (enableTokenCache) {
             jdbcString = String.format("%s;TokenCachePassPhrase=%s;EnableTokenCache=1",
                     jdbcString, tokenCachePassPhrase);

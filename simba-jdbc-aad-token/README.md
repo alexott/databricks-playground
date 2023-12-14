@@ -24,6 +24,7 @@ You need to update source code and adjust following parameters:
 * `query` - what query should be executed
 * `host` - the host portion of the Databricks workspace (obtained from SQL Warehouse configuraiton)
 * `httpPath` - the HTTP Path of the SQL Warehouse (obtained from SQL Warehouse configuraiton)
+* `oauthClientId` - (optional) if you don't have Azure application with name `databricks-sql-jdbc`, then set it to the Application ID of the Azure application that will be used for authentication.
 
 ## Build & run
 
