@@ -23,7 +23,7 @@ class SimbaJDBCAadTokenServicePrincipal {
         Class.forName(JDBC_DRIVER);
         System.out.println("Getting JDBC connection");
         try (Connection conn = DriverManager.getConnection(jdbcString);
-             Statement stmt = conn.createStatement()) {
+            Statement stmt = conn.createStatement()) {
             System.out.println("Going to execute query");
             try (ResultSet rs = stmt.executeQuery(query)) {
                 System.out.println("Query is executed");

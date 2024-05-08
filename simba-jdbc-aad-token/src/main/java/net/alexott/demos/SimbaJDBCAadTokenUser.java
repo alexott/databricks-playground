@@ -14,7 +14,6 @@ class SimbaJDBCAadTokenUser {
         String host = "adb-.....17.azuredatabricks.net";
         String httpPath = "/sql/1.0/warehouses/....";
         String oauthClientId = "";
-        String oauthClientId = "96eecda7-19ea-49cc-abb5-240097d554f5";
 
         boolean enableTokenCache = System.getProperty("enableTokenCache", "false")
                 .equalsIgnoreCase("true");
