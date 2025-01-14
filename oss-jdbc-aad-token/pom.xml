@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.databricks</groupId>
       <artifactId>databricks-jdbc</artifactId>
-      <version>0.9.0-oss</version>
+      <version>0.9.8-oss</version>
     </dependency>
   </dependencies>
 

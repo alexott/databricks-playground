@@ -6,14 +6,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
-class OssJDBCAadTokenServicePrincipal {
+class OssJDBCOAuthDatabricksServicePrincipal {
 
     public static void main(String[] args) throws Exception {
         // Variables to set
         String query = "select 42, current_timestamp(), current_catalog(), current_database(), current_user()";
         String clientId = "...";
         String clientSecret = "...";
-        String host = "adb-.....17.azuredatabricks.net";
+        String host = "adb-...azuredatabricks.net";
         String httpPath = "/sql/1.0/warehouses/....";
         String jdbcString = String.format("jdbc:databricks://%s:443/default;transportMode=http;ssl=1;httpPath=%s;AuthMech=11;Auth_Flow=1;OAuth2ClientId=%s;OAuth2Secret=%s",
                 host, httpPath, clientId, clientSecret);
