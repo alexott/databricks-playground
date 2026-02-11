@@ -25,7 +25,7 @@ class AwsJwtIdTokenSource(oidc.IdTokenSource):
         self.tags = tags
         s3_client = boto3.client('s3')
         self.region = s3_client.meta.region_name
-
+    
     def id_token(self) -> oidc.IdToken:
         sts_client = boto3.client('sts', region_name=self.region)
         response = sts_client.get_web_identity_token(

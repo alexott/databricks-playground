@@ -4,8 +4,12 @@ This directory contains an example of using [AWS outbound identity federation](h
 
 The code is in the `aws-jwt-in-py-sdk.py` file - it instantiates a Databricks workspace client with  the custom credential strategy and lists clusters in the workspace.  To run it you need to install `databricks-sdk` and `boto3` packages (this could be done using the Poetry tool).
 
-You also need to specify audience, and other parameters in the code (lines 10-16).   You need to configure service principal federation policy as described in the [documentation](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/auth/oauth-federation-policy#configure-a-service-principal-federation-policy) (you can configure account-wide policy as well).  Example you can see on the screenshot:
+You also need to specify audience, and other parameters in the code (lines 10-16).   You need to configure service principal federation policy as described in the [documentation](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/auth/oauth-federation-policy#configure-a-service-principal-federation-policy) (you can configure account-wide policy as well).  The subject value is the ARN of the IAM role.  The issuer could be obtained via AWS console or via `GetOutboundWebIdentityFederationInfo` API.  Example you can see on the screenshot:
 
 ![SP federation policy](sp-fed-policy.png)
 
 Specific service principal needs to be added into Databricks workspace.  The URL of the Databricks workspace is specified via `DATABRICKS_HOST` environment variable or directly in  the code (line 46).  You also need to specify `CLIENT_ID` environment variable or set in the code (line 47) to trigger service principal federation.
+
+## Creating VM with instance profile attached
+
+Change to the `terraform` folder and do `terraform init`, `terraform apply` to create a VPC, IAM role, instance profile, and EC2 instance that has permission to create JWT tokens.
