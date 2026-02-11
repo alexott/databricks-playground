@@ -1,6 +1,8 @@
 This repository contains different code samples & other examples related to the Databricks platform & Spark:
 
 * [airflow-dags](airflow-dags) - Examples of Airflow DAGs for Databricks.
+* [aws-jwt-in-py-sdk](aws-jwt-in-py-sdk) - example of using AWS outbound identity federation with Databricks Python SDK
+* [azure-mi-in-py-sdk](azure-mi-in-py-sdk) - example of using Azure Managed Identity with Databricks Python SDK
 * [database-diagram-builder](database-diagram-builder) - tool to generate UML diagram(s) for tables in Databricks/Spark database.
 * [dbconnect-maven](dbconnect-maven) - skeleton of the Maven project for simple Spark job, and instructions on how to run it via databricks-connect.
 * [dbconnect-package-versions-check](dbconnect-package-versions-check) - tool to checks compatibility of local Databricks connect environment with Databricks cluster.
